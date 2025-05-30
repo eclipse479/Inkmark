@@ -1,0 +1,11 @@
+Binaries/
+Config/
+DerivedDataCache/
+Intermediate/
+Saved/
+Content/
+!Content/Aaron
+!Content/Nixon
+.vs/
+/Inkmark.sln
+/Inkmark.uproject

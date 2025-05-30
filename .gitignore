@@ -3,9 +3,14 @@ Config/
 DerivedDataCache/
 Intermediate/
 Saved/
-Content/
-!Content/Aaron
-!Content/Nixon
+Content/Characters/
+Content/Collections/
+Content/Developers/
+Content/LevelPrototyping/
+Content/StarterContent/
+Content/ThirdPerson/
+Content/__ExternalActors__/
+Content/__ExternalObjects__/
 .vs/
 /Inkmark.sln
 /Inkmark.uproject

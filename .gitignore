@@ -10,8 +10,8 @@ Content/Developers/
 Content/LevelPrototyping/
 Content/StarterContent/
 Content/ThirdPerson/
-
-
+Content/__ExternalObjects__/
+Content/__ExternalActors__/
 .vs/
 /Inkmark.sln
 /Inkmark.uproject

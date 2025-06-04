@@ -1,0 +1,31 @@
+<<<<<<< HEAD
+// Copyright Epic Games, Inc. All Rights Reserved.
+
+using UnrealBuildTool;
+
+public class Inkmark : ModuleRules
+{
+	public Inkmark(ReadOnlyTargetRules Target) : base(Target)
+	{
+		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
+
+		PrivateIncludePaths.AddRange(new string[] { "Inkmark/", "Inkmark/PaintBrushSystem" });
+	}
+}
+=======
+// Copyright Epic Games, Inc. All Rights Reserved.
+
+using UnrealBuildTool;
+
+public class Inkmark : ModuleRules
+{
+	public Inkmark(ReadOnlyTargetRules Target) : base(Target)
+	{
+		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
+	}
+}
+>>>>>>> 6b74425 (something changed not sure what)

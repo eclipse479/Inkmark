@@ -5,6 +5,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+
+#include "Kismet/KismetMathLibrary.h"
+
 #include "InkmarkCharacter.generated.h"
 
 class USpringArmComponent;
@@ -14,7 +17,21 @@ class UInputAction;
 class UPaintCanvasComponent;
 class APaintCanvasActor;
 
+class UBoxComponent;
+
+class UAnimMontage;
+
 struct FInputActionValue;
+
+USTRUCT(BlueprintType)
+struct FAttackAnimation
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, Category = Attack)
+	TArray<UAnimMontage*> AttackMontages;
+};
+
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -58,8 +75,15 @@ class AInkmarkCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* PaintAction;
 
+	/** Paint Button Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* AttackAction;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PaintCanvas, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<APaintCanvasActor> PaintCanvasType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PaintCanvas, meta = (AllowPrivateAccess = "true"))
+	FAttackAnimation AttackAnimation;
 public:
 	AInkmarkCharacter();
 	
@@ -85,10 +109,46 @@ protected:
 	// To add mapping context
 	virtual void BeginPlay();
 
+	// Play Montage of attack animation, why like this?
+	void PlayAnimation()
+	{
+		int32 AnimIndex = UKismetMathLibrary::RandomIntegerInRange(0, AttackAnimation.AttackMontages.Num() - 1);
+
+		UAnimMontage* anim = AttackAnimation.AttackMontages[AnimIndex];
+
+		bool HasAttackAnim = anim != nullptr;
+
+		if (HasAttackAnim)
+		{
+			GetMesh()->GetAnimInstance()->Montage_Play(anim, 1.0f);
+		}
+	}
+
+
+	UFUNCTION(BlueprintCallable, Category = PaintCanvas)
+	void EnableHitBox();
+
+	UFUNCTION(BlueprintCallable, Category = PaintCanvas)
+	void DisableHitBox();
+
+	// Hit damage code
+	UFUNCTION(BlueprintCallable, Category = PaintCanvas)
+	void HitBoxDamage(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
 public:
+	/** Melee Events **/
+	UFUNCTION(BlueprintImplementableEvent)
+	void StartMeleeHitEvent();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void EndMeleeHitEvent();
+
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	// Hit Box 
+	UBoxComponent* MeleeHitBox;
 };
 

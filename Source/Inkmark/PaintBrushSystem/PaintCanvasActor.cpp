@@ -2,7 +2,3 @@
 
 
 #include "PaintBrushSystem/PaintCanvasActor.h"
-
-APaintCanvasActor::APaintCanvasActor()
-{
-}

@@ -13,8 +13,11 @@
 
 #include "Kismet/GameplayStatics.h"
 
+#include "enemy.h"
+
 #include "PaintCanvasComponent/PaintCanvasComponent.h"
 #include "PaintBrushSystem/PaintCanvasActor.h"
+#include "Components/BoxComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -83,6 +86,35 @@ void AInkmarkCharacter::BeginPlay()
 	PaintCanvasActor->AttachToComponent(FollowCamera, attachmentRules);
 	PaintCanvasActor->SetActorRelativeLocation(FVector(100.0f, 0.0f, 0.0f));
 	PaintCanvasActor->SetActorRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+
+	// Get MeleeHitBox
+	MeleeHitBox = GetComponentByClass<UBoxComponent>();
+	MeleeHitBox->OnComponentBeginOverlap.AddDynamic(this, &AInkmarkCharacter::HitBoxDamage);
+}
+
+void AInkmarkCharacter::EnableHitBox()
+{
+	MeleeHitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+}
+
+void AInkmarkCharacter::DisableHitBox()
+{
+	MeleeHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void AInkmarkCharacter::HitBoxDamage(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	bool HasHit = OtherActor != nullptr;
+
+	if (HasHit)
+	{
+		Aenemy* enemy = Cast<Aenemy>(OtherActor);
+
+		if (enemy)
+		{
+			enemy->DamageDong(10);
+		}
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -115,6 +147,9 @@ void AInkmarkCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		// Paint
 		EnhancedInputComponent->BindAction(PaintAction, ETriggerEvent::Triggered, this, &AInkmarkCharacter::TrackMousePosition);
 		EnhancedInputComponent->BindAction(PaintAction, ETriggerEvent::None, this, &AInkmarkCharacter::CancelPaint);
+
+		// Attack
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AInkmarkCharacter::PlayAnimation);
 	}
 	else
 	{

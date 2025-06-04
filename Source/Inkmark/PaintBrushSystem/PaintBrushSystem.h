@@ -7,12 +7,11 @@
 
 #include "Kismet/KismetSystemLibrary.h"
 
-#include "Engine/DecalActor.h"
-
 #include "PaintBrushSystem.generated.h"
 
 
 class UNiagaraSystem;
+class ADecalActor;
 
 // Paint Collision Data such Targets and ignore
 USTRUCT(BlueprintType)
@@ -64,7 +63,7 @@ public:
 	void CastPaintTrace(const UObject* WorldContextObject, const FVector Start, const FVector End, float Radius);
 
 	// Spawn decal at location and facing direction
-	void SpawnPaintDecal(FVector location, FVector Normal);
+	void SpawnPaintDecal(UWorld& world, FVector location, FVector Normal);
 
 public:
 	UPROPERTY(BlueprintReadWrite, Category = "Paint Brush Hit Data")

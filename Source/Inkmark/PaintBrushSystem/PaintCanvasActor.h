@@ -63,7 +63,10 @@ class INKMARK_API APaintCanvasActor : public AActor
 	
 public:	
 	// Sets default values for this actor's properties
-	APaintCanvasActor();
+	APaintCanvasActor()
+	{
+		BrushSystem = NewObject<UPaintBrushSystem>();
+	}
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void DrawOntoCanvas(UTexture2D* tex2d, float brush_size, FVector2D draw_location);
@@ -71,28 +74,30 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void ClearPaintCanvas();
 
-	void AddHitToBuffer(FHitResult& hit, FVector Direction)
+	void AddHitToBuffer(FVector Start, FVector Direction)
 	{
-		Hits.Add(hit);
-		StartPoints.Add(hit.ImpactPoint);
-
-		AimDirection = Direction;
+		StartPoints.Add(Start);
+		EndPoints.Add(Direction);
+		//AimDirection = Direction;
 	}
 
 	UFUNCTION()
 	void FireAndClearHitScans()
 	{
-		bool HasHitsInBuffer = Hits.Num() > 0;
+		bool HasHitsInBuffer = StartPoints.Num() > 0;
 
 		if (!HasHitsInBuffer)
 			return;
 
-		for (FVector StartPosition : StartPoints)
+		for (int32 index = 0; index < StartPoints.Num(); ++index)
 		{
 			FHitResult hit;
-
 			Aenemy* enemy;
-			if (UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(), StartPosition, (AimDirection * HitScanDistance) + StartPosition, ObjectTargets, true, ActorsToIgnore, EDrawDebugTrace::ForDuration, hit, false))
+			FVector StartPosition = StartPoints[index];
+			FVector EndPosition = EndPoints[index];
+
+
+			if (UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(), StartPosition, EndPosition, ObjectTargets, true, ActorsToIgnore, EDrawDebugTrace::ForDuration, hit, false))
 			{
 				enemy = Cast<Aenemy>(hit.GetActor());
 				bool HasHitEnemy = enemy != nullptr;
@@ -102,16 +107,24 @@ public:
 					enemy->DamageDong(1);
 				}
 			}
+			else
+			{
+				BrushSystem->DecalObject = DecalObject;
+				BrushSystem->SpawnPaintDecal(*GetWorld(), hit.ImpactPoint, hit.ImpactNormal);
+			}
 		}
 
 		// Clear for next usage
 		StartPoints.Empty();
-		Hits.Empty();
+		EndPoints.Empty();
+		//Hits.Empty();
 	}
 
 public:
 	// Start points
 	TArray<FVector> StartPoints;
+	// End Points
+	TArray<FVector> EndPoints;
 
 	// Hits results
 	TArray<FHitResult> Hits;
@@ -122,8 +135,13 @@ public:
 
 	TArray<AActor*> ActorsToIgnore;
 
+	UPROPERTY(EditAnywhere, Category = "Decal Paint")
+	TSubclassOf<ADecalActor> DecalObject;
+
 	UPROPERTY(EditAnywhere, Category = "Targets")
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTargets;
 
 	FVector AimDirection;
+
+	UPaintBrushSystem* BrushSystem;
 };

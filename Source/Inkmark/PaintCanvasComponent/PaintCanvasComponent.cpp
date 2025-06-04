@@ -109,7 +109,7 @@ void UPaintCanvasComponent::GetBrushScreenPosition(FVector StartLocation, FVecto
 			UGameplayStatics::FindCollisionUV(hit, 0, location);
 
 			paintActor->DrawOntoCanvas(PaintBrushData.BrushTexture, PaintBrushData.BrushSize, location);
-			paintActor->AddHitToBuffer(hit, UKismetMathLibrary::Normal(EndLocation, 0.5f));
+			paintActor->AddHitToBuffer(StartLocation, EndLocation);
 		}
 	}
 

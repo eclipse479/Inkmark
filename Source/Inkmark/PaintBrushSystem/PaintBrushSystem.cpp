@@ -3,6 +3,8 @@
 
 #include "PaintBrushSystem/PaintBrushSystem.h"
 
+#include "Engine/DecalActor.h"
+
 
 void UPaintBrushSystem::CastPaintTrace(const UObject* WorldContextObject, const FVector Start, const FVector End, float Radius)
 {
@@ -25,14 +27,14 @@ void UPaintBrushSystem::CastPaintTrace(const UObject* WorldContextObject, const 
 	bool HasHit = UKismetSystemLibrary::SphereTraceMultiForObjects(world, Start, End, Radius, objTypes, true, actorsToIgnore, debugType, hits, IgnoreSelf, traceNotHitColour, traceHitColour, drawTime);
 }
 
-void UPaintBrushSystem::SpawnPaintDecal(FVector location, FVector Normal)
+void UPaintBrushSystem::SpawnPaintDecal(UWorld& world, FVector location, FVector Normal)
 {
 	FActorSpawnParameters spawnParams;
 	spawnParams.Owner = nullptr;
 	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	// spawnParams.
 
-	FRotator Rot = Normal.Rotation();
+	
 
-	ADecalActor* decal = GetOuter()->GetWorld()->SpawnActor<ADecalActor>(DecalObject, location, Rot);
+	ADecalActor* decal = world.SpawnActor<ADecalActor>(DecalObject, location, Normal.Rotation());
 }

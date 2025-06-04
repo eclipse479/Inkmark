@@ -1,3 +1,4 @@
+HEAD
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 using UnrealBuildTool;
@@ -13,3 +14,5 @@ public class Inkmark : ModuleRules
 		PrivateIncludePaths.AddRange(new string[] { "Inkmark/", "Inkmark/PaintBrushSystem" });
 	}
 }
+
+

@@ -1,0 +1,31 @@
+[33mcommit ca7623360aa7f749407d03bbc13a0b63ccf631bb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: Aaron <aaronzstv@gmail.com>
+Date:   Sat May 31 22:01:04 2025 +1000
+
+    enemy, outline shader, added
+    
+    enemy can take damage and change colour as damage is done
+
+[33mcommit 8f1796759b660e77f8341cce3df558d7f48e6101[m
+Author: Aaron <aaronzstv@gmail.com>
+Date:   Fri May 30 21:55:51 2025 +1000
+
+    added name files and the external actor/object just in case
+
+[33mcommit f898ae46764323210423094e8b3d2b737102c654[m
+Author: Aaron <aaronzstv@gmail.com>
+Date:   Fri May 30 21:52:58 2025 +1000
+
+    update gitignore
+
+[33mcommit 82b7e633b90fa6d972c1ec1c23591d76a24b71f3[m
+Author: Aaron <aaronzstv@gmail.com>
+Date:   Fri May 30 21:44:43 2025 +1000
+
+    git is only the content and source folder, in the content folder only the directories with our names are saved to Git
+
+[33mcommit b7e7bc49323981301360b0de093819203604fd86[m
+Author: eclipse479 <49893045+eclipse479@users.noreply.github.com>
+Date:   Fri May 30 21:17:40 2025 +1000
+
+    Initial commit

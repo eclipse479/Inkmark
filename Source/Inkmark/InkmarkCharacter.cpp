@@ -11,6 +11,11 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 
+#include "Kismet/GameplayStatics.h"
+
+#include "PaintCanvasComponent/PaintCanvasComponent.h"
+#include "PaintBrushSystem/PaintCanvasActor.h"
+
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 //////////////////////////////////////////////////////////////////////////
@@ -45,10 +50,14 @@ AInkmarkCharacter::AInkmarkCharacter()
 	CameraBoom->TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 
+
 	// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+
+	PaintCanvasComp = CreateDefaultSubobject<UPaintCanvasComponent>(TEXT("PaintCanvasComp"));
+	PaintCanvasComp->SetupAttachment(CameraBoom);
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -58,6 +67,22 @@ void AInkmarkCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+
+	// Create a canvas component
+	FActorSpawnParameters spawnParams;
+	spawnParams.Owner = this;
+	PaintCanvasActor = GetWorld()->SpawnActor<APaintCanvasActor>(PaintCanvasType, spawnParams);
+
+	USceneComponent& CameraChildComp = *FollowCamera->GetChildComponent(0);
+
+	FAttachmentTransformRules attachmentRules = FAttachmentTransformRules::SnapToTargetNotIncludingScale;
+	//attachmentRules.LocationRule = EAttachmentRule::SnapToTarget;
+	//attachmentRules.RotationRule = EAttachmentRule::KeepRelative;
+	//attachmentRules.ScaleRule = EAttachmentRule::KeepRelative;
+
+	PaintCanvasActor->AttachToComponent(FollowCamera, attachmentRules);
+	PaintCanvasActor->SetActorRelativeLocation(FVector(100.0f, 0.0f, 0.0f));
+	PaintCanvasActor->SetActorRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -86,6 +111,10 @@ void AInkmarkCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AInkmarkCharacter::Look);
+
+		// Paint
+		EnhancedInputComponent->BindAction(PaintAction, ETriggerEvent::Triggered, this, &AInkmarkCharacter::TrackMousePosition);
+		EnhancedInputComponent->BindAction(PaintAction, ETriggerEvent::None, this, &AInkmarkCharacter::CancelPaint);
 	}
 	else
 	{
@@ -127,4 +156,57 @@ void AInkmarkCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void AInkmarkCharacter::TrackMousePosition(const FInputActionValue& Value)
+{
+	float value = Value.Get<float>();
+
+	bool IsUsed = Controller && value >= 1.0f;
+
+	APlayerController& PC = *Cast<APlayerController>(Controller);
+
+	PC.SetIgnoreLookInput(true);
+
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0);
+
+	PC.SetShowMouseCursor(true);
+
+	float MouseX, MouseY;
+	FVector2D MousePosition;
+	FVector WorldLoc = FollowCamera->GetComponentLocation();
+	FVector WorldDir = FollowCamera->GetForwardVector();
+
+		
+	PC.GetMousePosition(MouseX, MouseY);
+	MousePosition = FVector2D(MouseX, MouseY);
+
+	PC.DeprojectMousePositionToWorld(WorldLoc, WorldDir);
+	//UGameplayStatics::DeprojectScreenToWorld(&PC, MousePosition, WorldLoc, WorldDir);
+
+	PaintCanvasActor->SetActorHiddenInGame(false);
+
+	PaintCanvasComp->GetBrushScreenPosition(WorldLoc, WorldLoc + (WorldDir * 1000.0f));
+}
+
+void AInkmarkCharacter::CancelPaint(const FInputActionValue& Value)
+{
+	float value = Value.Get<float>();
+
+	// bool IsUsed = Controller && value >= 1.0f;
+
+	APlayerController& PC = *Cast<APlayerController>(Controller);
+
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
+
+	PC.SetInputMode(FInputModeGameOnly());
+
+	PC.SetShowMouseCursor(false);
+	PC.ResetIgnoreLookInput();
+
+	// This wil trigger every time
+	PaintCanvasActor->FireAndClearHitScans();
+
+	PaintCanvasActor->ClearPaintCanvas();
+	PaintCanvasActor->SetActorHiddenInGame(true);
 }

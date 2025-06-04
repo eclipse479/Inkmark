@@ -11,6 +11,9 @@ class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
+class UPaintCanvasComponent;
+class APaintCanvasActor;
+
 struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
@@ -27,6 +30,13 @@ class AInkmarkCharacter : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
+
+	/** Paint Canvas **/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	APaintCanvasActor* PaintCanvasActor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPaintCanvasComponent* PaintCanvasComp;
 	
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -44,6 +54,12 @@ class AInkmarkCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
 
+	/** Paint Button Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* PaintAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PaintCanvas, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<APaintCanvasActor> PaintCanvasType;
 public:
 	AInkmarkCharacter();
 	
@@ -56,6 +72,11 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 			
+	/** Called for Tracking Mouse Position **/
+	void TrackMousePosition(const FInputActionValue& Value);
+
+	/** Called for Tracking Mouse Position **/
+	void CancelPaint(const FInputActionValue& Value);
 
 protected:
 	// APawn interface

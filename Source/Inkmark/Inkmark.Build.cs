@@ -9,5 +9,7 @@ public class Inkmark : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
+
+		PrivateIncludePaths.AddRange(new string[] { "Inkmark/", "Inkmark/PaintBrushSystem" });
 	}
 }

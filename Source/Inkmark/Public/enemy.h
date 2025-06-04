@@ -45,4 +45,7 @@ public:
 	void GetInked(int ink);
 	UFUNCTION(BlueprintCallable, Category = "damage")
 	void InkFull();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void DamageDong(int value);
 };

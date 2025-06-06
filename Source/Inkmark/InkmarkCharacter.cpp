@@ -122,7 +122,7 @@ void AInkmarkCharacter::HitBoxDamage(UPrimitiveComponent* OverlappedComponent, A
 		// Hit an enemy
 		if (HitEnemy)
 		{
-			enemy->DamageDong(PlayerStatValues.CurrentAttack);
+			//enemy->DamageDong(PlayerStatValues.CurrentAttack);
 		}
 
 		// Hit an Inkable object

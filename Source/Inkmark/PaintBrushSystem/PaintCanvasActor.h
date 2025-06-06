@@ -122,7 +122,7 @@ public:
 
 				if (HasHitEnemy)
 				{
-					enemy->DamageDong(PaintDamage);
+					//enemy->DamageDong(PaintDamage);
 
 					// Once hit, save in record
 					EnemiesHit.Add(enemy);

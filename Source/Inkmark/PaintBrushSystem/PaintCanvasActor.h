@@ -103,18 +103,30 @@ public:
 			if (UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(), StartPosition, EndPosition, ObjectTargets, true, ActorsToIgnore, EDrawDebugTrace::ForDuration, hit, false))
 			{
 				enemy = Cast<Aenemy>(hit.GetActor());
+
+				// Is this in already?
+				bool AlreadyHit = EnemiesHit.Contains(enemy);
+
+				if (AlreadyHit)
+					continue;
+
+				// boolean for has hit an enemy
 				bool HasHitEnemy = enemy != nullptr;
 
+				// boolean
 				bool InkHitable = hit.GetActor()->GetClass()->ImplementsInterface(UInkableInterface::StaticClass());
 
+				
 				if (InkHitable)
 					IInkableInterface::Execute_InkObject(hit.GetActor(), 2.0f);
 
 				if (HasHitEnemy)
 				{
-					enemy->DamageDong(1);
-				}
+					enemy->DamageDong(PaintDamage);
 
+					// Once hit, save in record
+					EnemiesHit.Add(enemy);
+				}
 			}
 			else
 			{
@@ -126,6 +138,7 @@ public:
 		// Clear for next usage
 		StartPoints.Empty();
 		EndPoints.Empty();
+		EnemiesHit.Empty();
 		//Hits.Empty();
 	}
 
@@ -138,9 +151,16 @@ public:
 	// Hits results
 	TArray<FHitResult> Hits;
 
+	// List of Enemies
+	TArray<Aenemy*> EnemiesHit;
+
 	// How far the scan checks
 	UPROPERTY(EditAnywhere, Category = TraceScan, meta = (AllowPrivateAccess = true))
 	float HitScanDistance = 1000.0f;
+
+	// Paint Damage
+	UPROPERTY(EditAnywhere, Category = PaintDamage, meta = (AllowPrivateAccess = true))
+	int PaintDamage = 1;
 
 	TArray<AActor*> ActorsToIgnore;
 

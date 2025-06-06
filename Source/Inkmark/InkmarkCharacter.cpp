@@ -107,16 +107,30 @@ void AInkmarkCharacter::DisableHitBox()
 
 void AInkmarkCharacter::HitBoxDamage(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	bool HasHit = OtherActor != nullptr;
+	bool HasHit = OtherActor != nullptr && OtherActor != this;
 
 	if (HasHit)
 	{
 		Aenemy* enemy = Cast<Aenemy>(OtherActor);
+		//IInkableInterface* InkHitable = OtherActor->GetImpl
 
-		if (enemy)
+		// Has overlapped Inkable
+		//bool HitInkable = InkHitable != nullptr;
+
+		bool HitEnemy = enemy != nullptr;
+
+		// Hit an enemy
+		if (HitEnemy)
 		{
 			enemy->DamageDong(PlayerStatValues.CurrentAttack);
 		}
+
+		//// Hit an Inkable object
+		//if (HitInkable)
+		//{
+		//	
+		//	InkHitable->InkObject(PlayerStatValues.CurrentAttack);
+		//}
 	}
 }
 

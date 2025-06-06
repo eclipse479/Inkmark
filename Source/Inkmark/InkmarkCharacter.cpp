@@ -90,6 +90,9 @@ void AInkmarkCharacter::BeginPlay()
 	// Get MeleeHitBox
 	MeleeHitBox = GetComponentByClass<UBoxComponent>();
 	MeleeHitBox->OnComponentBeginOverlap.AddDynamic(this, &AInkmarkCharacter::HitBoxDamage);
+
+	// Init Player Stats
+	PlayerStatValues.InitStats();
 }
 
 void AInkmarkCharacter::EnableHitBox()
@@ -112,9 +115,59 @@ void AInkmarkCharacter::HitBoxDamage(UPrimitiveComponent* OverlappedComponent, A
 
 		if (enemy)
 		{
-			enemy->DamageDong(10);
+			enemy->DamageDong(PlayerStatValues.CurrentAttack);
 		}
 	}
+}
+
+void AInkmarkCharacter::IncreaseInkAmount(int value)
+{
+	PlayerStatValues.CurrentInk += value;
+
+	bool GreaterThanMaxInk = PlayerStatValues.CurrentInk > PlayerStatValues.MaxInk;
+
+	PlayerStatValues.bOverflow = GreaterThanMaxInk;
+}
+
+void AInkmarkCharacter::DecreaseInkAmount(int value)
+{
+	PlayerStatValues.CurrentInk -= value;
+
+	bool GreaterThanMaxInk = PlayerStatValues.CurrentInk > PlayerStatValues.MaxInk;
+
+	PlayerStatValues.bOverflow = GreaterThanMaxInk;
+}
+
+void AInkmarkCharacter::ScaleDamage()
+{
+	// If in overflow, then just 
+	if (PlayerStatValues.bOverflow)
+	{
+		PlayerStatValues.CurrentAttack = PlayerStatValues.OverflowAttack;
+		return;
+	}
+
+	// Otherwise set damage value to this
+	int newDamage = PlayerStatValues.BaseAttack + (PlayerStatValues.CurrentInk / PlayerStatValues.BaseAttack);
+	PlayerStatValues.CurrentAttack = newDamage;
+}
+
+void AInkmarkCharacter::InkObject_Implementation(int Damage)
+{
+	int& Health = PlayerStatValues.CurrentHealth;
+	bool HasHealth = Health > 0;
+
+	// If has health greater than zero
+	if (HasHealth)
+	{
+		Health -= Damage;
+	}
+	else
+	{
+		// Die
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Damage Player"));
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -195,6 +248,11 @@ void AInkmarkCharacter::Look(const FInputActionValue& Value)
 
 void AInkmarkCharacter::TrackMousePosition(const FInputActionValue& Value)
 {
+	bool bCanUse = PlayerStatValues.CurrentInk > 0;
+
+	if (!bCanUse)
+		return;
+
 	float value = Value.Get<float>();
 
 	bool IsUsed = Controller && value >= 1.0f;
@@ -212,7 +270,9 @@ void AInkmarkCharacter::TrackMousePosition(const FInputActionValue& Value)
 	FVector WorldLoc = FollowCamera->GetComponentLocation();
 	FVector WorldDir = FollowCamera->GetForwardVector();
 
-		
+	// Tells input if this was used
+	PlayerStatValues.bPaintBrushInputHeld = IsUsed;
+
 	PC.GetMousePosition(MouseX, MouseY);
 	MousePosition = FVector2D(MouseX, MouseY);
 
@@ -238,6 +298,13 @@ void AInkmarkCharacter::CancelPaint(const FInputActionValue& Value)
 
 	PC.SetShowMouseCursor(false);
 	PC.ResetIgnoreLookInput();
+
+	// Only decrease amount when input was held
+	if (PlayerStatValues.bPaintBrushInputHeld)
+	{
+		DecreaseInkAmount(1);
+		PlayerStatValues.bPaintBrushInputHeld = false;
+	}
 
 	// This wil trigger every time
 	PaintCanvasActor->FireAndClearHitScans();

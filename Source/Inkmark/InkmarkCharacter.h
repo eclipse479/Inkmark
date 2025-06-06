@@ -7,6 +7,7 @@
 #include "Logging/LogMacros.h"
 
 #include "Kismet/KismetMathLibrary.h"
+#include "DamageInterface/InkableInterface.h"
 
 #include "InkmarkCharacter.generated.h"
 
@@ -32,11 +33,60 @@ struct FAttackAnimation
 	TArray<UAnimMontage*> AttackMontages;
 };
 
+// Player Stat Values for health
+USTRUCT(BlueprintType)
+struct FPlayerStats
+{
+	GENERATED_BODY()
+
+	void InitStats()
+	{
+		CurrentHealth = MaxHealth;
+		CurrentInk = MaxInk;
+		CurrentAttack = BaseAttack;
+		CurrentPaintGauge = PaintGauge;
+	}
+
+	// Health Actor or entity can have
+	UPROPERTY(EditAnywhere, Category = Stats)
+	int MaxHealth = 100;
+
+	// Max ink actor or entity
+	UPROPERTY(EditAnywhere, Category = Stats)
+	int MaxInk = 20;
+
+	// Base Attack Value for actor or entity
+	UPROPERTY(EditAnywhere, Category = Stats)
+	int BaseAttack = 2;
+
+	// Max Attack Value for actor or entity when in overflow
+	UPROPERTY(EditAnywhere, Category = Stats)
+	int OverflowAttack = 100;
+
+	// Base Attack Value for actor or entity
+	UPROPERTY(EditAnywhere, Category = Stats)
+	int PaintGauge = 10;
+
+	//***************************************//
+	// Mutable variables
+
+	int CurrentHealth = 0;
+
+	int CurrentInk = 0;
+
+	int CurrentAttack = 2;
+
+	int CurrentPaintGauge = 0;
+
+	bool bOverflow = false;
+
+	bool bPaintBrushInputHeld = false;
+};
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(config=Game)
-class AInkmarkCharacter : public ACharacter
+class AInkmarkCharacter : public ACharacter, public IInkableInterface
 {
 	GENERATED_BODY()
 
@@ -48,12 +98,6 @@ class AInkmarkCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
 
-	/** Paint Canvas **/
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	APaintCanvasActor* PaintCanvasActor;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	UPaintCanvasComponent* PaintCanvasComp;
 	
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -79,11 +123,31 @@ class AInkmarkCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* AttackAction;
 
+	/****************************************** Paint Canvas Start ***********************************************/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	APaintCanvasActor* PaintCanvasActor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPaintCanvasComponent* PaintCanvasComp;
+
+	/****************************************** Paint Canvas End ************************************************/
+
+	//******************************************************************************************************//
+	//*********************************** Player Stats and Abilities **************************************//
+	//******************************************************************************************************//
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PaintCanvas, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<APaintCanvasActor> PaintCanvasType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PaintCanvas, meta = (AllowPrivateAccess = "true"))
 	FAttackAnimation AttackAnimation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PlayerStats, meta = (AllowPrivateAccess = "true"))
+	FPlayerStats PlayerStatValues;
+
+	//******************************************************************************************************//
+	//*********************************** Player Stats and Abilities **************************************//
+	//******************************************************************************************************//
 public:
 	AInkmarkCharacter();
 	
@@ -134,6 +198,21 @@ protected:
 	// Hit damage code
 	UFUNCTION(BlueprintCallable, Category = PaintCanvas)
 	void HitBoxDamage(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	// Increase Ink Amount
+	UFUNCTION(BlueprintCallable, Category = PaintCanvas)
+	void IncreaseInkAmount(int value);
+
+	// Decrease Ink Amount
+	UFUNCTION(BlueprintCallable, Category = PaintCanvas)
+	void DecreaseInkAmount(int value);
+
+	// Adjust damage based on amount of ink
+	UFUNCTION(BlueprintCallable, Category = PaintDamage)
+	void ScaleDamage();
+
+	// Plays when damage is taken
+	virtual void InkObject_Implementation(int Damage) override;
 
 public:
 	/** Melee Events **/

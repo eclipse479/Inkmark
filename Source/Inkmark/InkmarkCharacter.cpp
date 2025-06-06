@@ -112,10 +112,10 @@ void AInkmarkCharacter::HitBoxDamage(UPrimitiveComponent* OverlappedComponent, A
 	if (HasHit)
 	{
 		Aenemy* enemy = Cast<Aenemy>(OtherActor);
-		//IInkableInterface* InkHitable = OtherActor->GetImpl
+		// IInkableInterface* InkHitable = 
 
 		// Has overlapped Inkable
-		//bool HitInkable = InkHitable != nullptr;
+		bool HitInkable = OtherActor->GetClass()->ImplementsInterface(UInkableInterface::StaticClass());
 
 		bool HitEnemy = enemy != nullptr;
 
@@ -125,12 +125,13 @@ void AInkmarkCharacter::HitBoxDamage(UPrimitiveComponent* OverlappedComponent, A
 			enemy->DamageDong(PlayerStatValues.CurrentAttack);
 		}
 
-		//// Hit an Inkable object
-		//if (HitInkable)
-		//{
-		//	
-		//	InkHitable->InkObject(PlayerStatValues.CurrentAttack);
-		//}
+		// Hit an Inkable object
+
+		if (HitInkable)
+		{
+			IInkableInterface::Execute_InkObject(OtherActor, PlayerStatValues.CurrentAttack);
+			//InkHitable->InkObject(PlayerStatValues.CurrentAttack);
+		}
 	}
 }
 
@@ -166,7 +167,7 @@ void AInkmarkCharacter::ScaleDamage()
 	PlayerStatValues.CurrentAttack = newDamage;
 }
 
-void AInkmarkCharacter::InkObject_Implementation(int Damage)
+void AInkmarkCharacter::InkObject_Implementation(float Damage)
 {
 	int& Health = PlayerStatValues.CurrentHealth;
 	bool HasHealth = Health > 0;

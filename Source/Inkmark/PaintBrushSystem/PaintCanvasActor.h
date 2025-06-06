@@ -8,7 +8,7 @@
 #include "PaintBrushSystem/PaintBrushSystem.h"
 
 #include "enemy.h"
-
+#include "DamageInterface/InkableInterface.h"
 #include "PaintCanvasActor.generated.h"
 
 class UPaintBrushSystem;
@@ -51,6 +51,9 @@ struct FPaintBrushDataForActor
 
 	UPROPERTY(EditAnywhere, Category = "Canvas Material")
 	float BrushSize = 20.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Damage")
+	float BrushDamage = 2.0f;
 
 	UMaterialInstanceDynamic* BrushMaterial;
 };
@@ -102,10 +105,16 @@ public:
 				enemy = Cast<Aenemy>(hit.GetActor());
 				bool HasHitEnemy = enemy != nullptr;
 
+				bool InkHitable = hit.GetActor()->GetClass()->ImplementsInterface(UInkableInterface::StaticClass());
+
+				if (InkHitable)
+					IInkableInterface::Execute_InkObject(hit.GetActor(), 2.0f);
+
 				if (HasHitEnemy)
 				{
 					enemy->DamageDong(1);
 				}
+
 			}
 			else
 			{

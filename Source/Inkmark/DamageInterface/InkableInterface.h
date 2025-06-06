@@ -24,7 +24,7 @@ class INKMARK_API IInkableInterface
 public:
 	// Applied ink effect and damage, override and do whatever you want
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "InkObjectAttack")
-	void InkObject(int Damage);
+	void InkObject(float Damage);
 
-	virtual void InkObject_Implementation(int Damage) = 0;
+	virtual void InkObject_Implementation(float Damage) = 0;
 };

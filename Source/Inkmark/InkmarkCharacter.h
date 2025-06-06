@@ -57,7 +57,7 @@ struct FPlayerStats
 
 	// Base Attack Value for actor or entity
 	UPROPERTY(EditAnywhere, Category = Stats)
-	int BaseAttack = 2;
+	float BaseAttack = 2;
 
 	// Max Attack Value for actor or entity when in overflow
 	UPROPERTY(EditAnywhere, Category = Stats)
@@ -74,7 +74,7 @@ struct FPlayerStats
 
 	int CurrentInk = 0;
 
-	int CurrentAttack = 2;
+	float CurrentAttack = 2;
 
 	int CurrentPaintGauge = 0;
 
@@ -212,7 +212,7 @@ protected:
 	void ScaleDamage();
 
 	// Plays when damage is taken
-	virtual void InkObject_Implementation(int Damage) override;
+	virtual void InkObject_Implementation(float Damage) override;
 
 public:
 	/** Melee Events **/
